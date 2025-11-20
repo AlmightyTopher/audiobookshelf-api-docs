@@ -2173,6 +2173,378 @@ This endpoint returns a library's authors.
 | --------- | -------------------------------------------- | ---------------------- |
 | `authors` | Array of [Author Expanded](#author-expanded) | The requested authors. |
 
+
+## Get a Library's Narrators
+
+```shell
+curl "https://abs.example.com/api/libraries/lib_c1u6t4p45c35rf0nzd/narrators" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "narrators": [
+    {
+      "name": "Sam Tsoutsouvas",
+      "numBooks": 15
+    },
+    {
+      "name": "George Guidall",
+      "numBooks": 8
+    }
+  ]
+}
+```
+
+This endpoint returns a library's narrators.
+
+### HTTP Request
+
+`GET https://abs.example.com/api/libraries/<ID>/narrators`
+
+### URL Parameters
+
+| Parameter | Description            |
+| --------- | ---------------------- |
+| ID        | The ID of the library. |
+
+### Response
+
+| Status | Meaning   | Description                                                                    | Schema    |
+| ------ | --------- | ------------------------------------------------------------------------------ | --------- |
+| 200    | OK        | Success                                                                        | See Below |
+| 404    | Not Found | The user cannot access the library, or no library with the provided ID exists. |
+
+#### Response Schema
+
+| Attribute   | Type                    | Description              |
+| ----------- | ----------------------- | ------------------------ |
+| `narrators` | Array of Narrator Objects | The requested narrators. |
+
+#### Narrator Object
+
+| Attribute  | Type    | Description                                      |
+| ---------- | ------- | ------------------------------------------------ |
+| `name`     | String  | The narrator's name.                              |
+| `numBooks` | Integer | The number of books narrated in this library.     |
+
+
+## Update a Narrator
+
+```shell
+curl -X PATCH "https://abs.example.com/api/libraries/lib_c1u6t4p45c35rf0nzd/narrators/Sam%20Tsoutsouvas" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Samuel Tsoutsouvas"}'
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "updated": true,
+  "numBooksUpdated": 15
+}
+```
+
+This endpoint updates (renames) a narrator in a library. All books with the old narrator name will be updated to use the new name.
+
+### HTTP Request
+
+`PATCH https://abs.example.com/api/libraries/<ID>/narrators/<NarratorName>`
+
+### URL Parameters
+
+| Parameter    | Description                                          |
+| ------------ | ---------------------------------------------------- |
+| ID           | The ID of the library.                               |
+| NarratorName | The current name of the narrator (URL encoded).      |
+
+### Parameters
+
+| Parameter | Type   | Description                |
+| --------- | ------ | -------------------------- |
+| `name`    | String | The new name for the narrator. |
+
+### Response
+
+| Status | Meaning   | Description                                                                    | Schema    |
+| ------ | --------- | ------------------------------------------------------------------------------ | --------- |
+| 200    | OK        | Success                                                                        | See Below |
+| 400    | Bad Request | Missing or invalid parameters.                                               |
+| 403    | Forbidden | An admin user is required to update narrators.                                 |
+| 404    | Not Found | The user cannot access the library, or no library with the provided ID exists. |
+
+#### Response Schema
+
+| Attribute         | Type    | Description                                    |
+| ----------------- | ------- | ---------------------------------------------- |
+| `updated`         | Boolean | Whether the narrator was updated successfully. |
+| `numBooksUpdated` | Integer | The number of books updated with the new name. |
+
+
+## Remove a Narrator
+
+```shell
+curl -X DELETE "https://abs.example.com/api/libraries/lib_c1u6t4p45c35rf0nzd/narrators/Sam%20Tsoutsouvas" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "numBooksUpdated": 15
+}
+```
+
+This endpoint removes a narrator from all books in a library.
+
+### HTTP Request
+
+`DELETE https://abs.example.com/api/libraries/<ID>/narrators/<NarratorName>`
+
+### URL Parameters
+
+| Parameter    | Description                                     |
+| ------------ | ----------------------------------------------- |
+| ID           | The ID of the library.                          |
+| NarratorName | The name of the narrator to remove (URL encoded). |
+
+### Response
+
+| Status | Meaning   | Description                                                                    | Schema    |
+| ------ | --------- | ------------------------------------------------------------------------------ | --------- |
+| 200    | OK        | Success                                                                        | See Below |
+| 403    | Forbidden | An admin user is required to remove narrators.                                 |
+| 404    | Not Found | The user cannot access the library, or no library with the provided ID exists. |
+
+#### Response Schema
+
+| Attribute         | Type    | Description                                           |
+| ----------------- | ------- | ----------------------------------------------------- |
+| `numBooksUpdated` | Integer | The number of books updated (narrator removed from).  |
+
+
+## Get a Specific Series in a Library
+
+```shell
+curl "https://abs.example.com/api/libraries/lib_c1u6t4p45c35rf0nzd/series/ser_cabkj4jeu8be3rap4g" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "id": "ser_cabkj4jeu8be3rap4g",
+  "name": "Sword of Truth",
+  "nameIgnorePrefix": "Sword of Truth",
+  "libraryId": "lib_c1u6t4p45c35rf0nzd",
+  "books": [
+    {
+      "id": "li_8gch9ve09orgn4fdz8",
+      "metadata": {
+        "title": "Wizards First Rule",
+        "subtitle": null,
+        "authors": [
+          {
+            "id": "aut_z3leimgybl7uf3y4ab",
+            "name": "Terry Goodkind"
+          }
+        ],
+        "narrators": ["Sam Tsoutsouvas"],
+        "publishedYear": "2008"
+      }
+    }
+  ],
+  "addedAt": 1650621073750,
+  "updatedAt": 1650621110769
+}
+```
+
+This endpoint retrieves a specific series in a library with its books.
+
+### HTTP Request
+
+`GET https://abs.example.com/api/libraries/<ID>/series/<SeriesID>`
+
+### URL Parameters
+
+| Parameter | Description             |
+| --------- | ----------------------- |
+| ID        | The ID of the library.  |
+| SeriesID  | The ID of the series.   |
+
+### Optional Query Parameters
+
+| Parameter | Type   | Description                                                                              |
+| --------- | ------ | ---------------------------------------------------------------------------------------- |
+| include   | String | A comma-separated list of what to include with the library items. The only option is `progress`. |
+
+### Response
+
+| Status | Meaning   | Description                                                                    | Schema    |
+| ------ | --------- | ------------------------------------------------------------------------------ | --------- |
+| 200    | OK        | Success                                                                        | [Series](#series) with books |
+| 404    | Not Found | The user cannot access the library, or no series with the provided ID exists.  |
+
+
+## Get a Library's OPML
+
+```shell
+curl "https://abs.example.com/api/libraries/lib_p9wkw2i85qy9oltijt/opml" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY"
+```
+
+This endpoint retrieves an OPML file containing all podcasts in a library. Only applicable for podcast libraries.
+
+### HTTP Request
+
+`GET https://abs.example.com/api/libraries/<ID>/opml`
+
+### URL Parameters
+
+| Parameter | Description            |
+| --------- | ---------------------- |
+| ID        | The ID of the library. |
+
+### Response
+
+| Status | Meaning   | Description                                                                    |
+| ------ | --------- | ------------------------------------------------------------------------------ |
+| 200    | OK        | Success - Returns OPML XML file                                                |
+| 400    | Bad Request | Not a podcast library.                                                       |
+| 404    | Not Found | The user cannot access the library, or no library with the provided ID exists. |
+
+
+## Get a Library's Podcast Titles
+
+```shell
+curl "https://abs.example.com/api/libraries/lib_p9wkw2i85qy9oltijt/podcast-titles" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "titles": [
+    "Welcome to Night Vale",
+    "The Adventure Zone",
+    "Serial"
+  ]
+}
+```
+
+This endpoint retrieves all podcast titles in a library. Only applicable for podcast libraries.
+
+### HTTP Request
+
+`GET https://abs.example.com/api/libraries/<ID>/podcast-titles`
+
+### URL Parameters
+
+| Parameter | Description            |
+| --------- | ---------------------- |
+| ID        | The ID of the library. |
+
+### Response
+
+| Status | Meaning   | Description                                                                    | Schema    |
+| ------ | --------- | ------------------------------------------------------------------------------ | --------- |
+| 200    | OK        | Success                                                                        | See Below |
+| 400    | Bad Request | Not a podcast library.                                                       |
+| 404    | Not Found | The user cannot access the library, or no library with the provided ID exists. |
+
+#### Response Schema
+
+| Attribute | Type            | Description                     |
+| --------- | --------------- | ------------------------------- |
+| `titles`  | Array of String | List of podcast titles. |
+
+
+## Download Multiple Library Items
+
+```shell
+curl "https://abs.example.com/api/libraries/lib_c1u6t4p45c35rf0nzd/download?libraryItemIds=li_item1,li_item2,li_item3" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY"
+```
+
+This endpoint downloads multiple library items as a single zip archive.
+
+### HTTP Request
+
+`GET https://abs.example.com/api/libraries/<ID>/download`
+
+### URL Parameters
+
+| Parameter | Description            |
+| --------- | ---------------------- |
+| ID        | The ID of the library. |
+
+### Query Parameters
+
+| Parameter        | Type   | Description                                                    |
+| ---------------- | ------ | -------------------------------------------------------------- |
+| libraryItemIds   | String | Comma-separated list of library item IDs to include in the zip. |
+
+### Response
+
+| Status | Meaning     | Description                                                                    |
+| ------ | ----------- | ------------------------------------------------------------------------------ |
+| 200    | OK          | Success - Returns zip file download                                            |
+| 400    | Bad Request | No library item IDs provided.                                                  |
+| 403    | Forbidden   | User does not have download permission.                                        |
+| 404    | Not Found   | The user cannot access the library, or no library with the provided ID exists. |
+
+
+## Remove Library Metadata
+
+```shell
+curl -X POST "https://abs.example.com/api/libraries/lib_c1u6t4p45c35rf0nzd/remove-metadata" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "message": "Metadata files removed",
+  "numFilesRemoved": 42
+}
+```
+
+This endpoint removes all metadata files (`.abs` files) from a library's folders.
+
+### HTTP Request
+
+`POST https://abs.example.com/api/libraries/<ID>/remove-metadata`
+
+### URL Parameters
+
+| Parameter | Description            |
+| --------- | ---------------------- |
+| ID        | The ID of the library. |
+
+### Response
+
+| Status | Meaning   | Description                                                                    | Schema    |
+| ------ | --------- | ------------------------------------------------------------------------------ | --------- |
+| 200    | OK        | Success                                                                        | See Below |
+| 403    | Forbidden | An admin user is required to remove metadata files.                            |
+| 404    | Not Found | The user cannot access the library, or no library with the provided ID exists. |
+
+#### Response Schema
+
+| Attribute        | Type    | Description                               |
+| ---------------- | ------- | ----------------------------------------- |
+| `message`        | String  | Success message.                          |
+| `numFilesRemoved`| Integer | The number of metadata files removed.     |
+
+
 ## Match All of a Library's Items
 
 ```shell

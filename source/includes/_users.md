@@ -439,6 +439,48 @@ Attribute | Type | Description
 `success` | Boolean | Whether the user was successfully deleted.
 
 
+## Unlink a User's OpenID Account
+
+```shell
+curl -X PATCH "https://abs.example.com/api/users/usr_rfk7dgyjp8kg4waewi/openid-unlink" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "success": true
+}
+```
+
+This endpoint unlinks a user's OpenID account from their Audiobookshelf account.
+
+### HTTP Request
+
+`PATCH http://abs.example.com/api/users/<ID>/openid-unlink`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+ID | The ID of the user.
+
+### Response
+
+Status | Meaning | Description | Schema
+------ | ------- | ----------- | ------
+200 | OK | Success | See below.
+403 | Forbidden | An admin user is required to unlink OpenID accounts. |
+404 | Not Found | No user with the provided ID exists. |
+
+#### Response Schema
+
+Attribute | Type | Description
+--------- | ---- | -----------
+`success` | Boolean | Whether the OpenID account was successfully unlinked.
+
+
 ## Get a User's Listening Sessions
 
 ```shell

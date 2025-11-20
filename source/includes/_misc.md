@@ -535,3 +535,307 @@ Status | Meaning | Description
 ------ | ------- | -----------
 200 | OK | Success
 400 | Bad Request | The `expression` parameter is required, or the `expression` is invalid.
+
+
+## Get Auth Settings
+
+```shell
+curl "https://abs.example.com/api/auth-settings" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "authOpenIDIssuerURL": null,
+  "authOpenIDAuthorizationURL": null,
+  "authOpenIDTokenURL": null,
+  "authOpenIDUserInfoURL": null,
+  "authOpenIDJwksURL": null,
+  "authOpenIDLogoutURL": null,
+  "authOpenIDClientID": null,
+  "authOpenIDClientSecret": null,
+  "authOpenIDButtonText": "Login with OpenID",
+  "authOpenIDAutoLaunch": false,
+  "authOpenIDAutoRegister": false,
+  "authOpenIDMatchExistingBy": null
+}
+```
+
+This endpoint retrieves the server's authentication settings, including OpenID configuration.
+
+### HTTP Request
+
+`GET http://abs.example.com/api/auth-settings`
+
+### Response
+
+Status | Meaning | Description | Schema
+------ | ------- | ----------- | ------
+200 | OK | Success | See below.
+
+#### Response Schema
+
+Attribute | Type | Description
+--------- | ---- | -----------
+`authOpenIDIssuerURL` | String or null | OpenID issuer URL.
+`authOpenIDAuthorizationURL` | String or null | OpenID authorization endpoint URL.
+`authOpenIDTokenURL` | String or null | OpenID token endpoint URL.
+`authOpenIDUserInfoURL` | String or null | OpenID user info endpoint URL.
+`authOpenIDJwksURL` | String or null | OpenID JWKS endpoint URL.
+`authOpenIDLogoutURL` | String or null | OpenID logout URL.
+`authOpenIDClientID` | String or null | OpenID client ID.
+`authOpenIDClientSecret` | String or null | OpenID client secret (redacted for non-admin users).
+`authOpenIDButtonText` | String | Text to display on the OpenID login button.
+`authOpenIDAutoLaunch` | Boolean | Whether to automatically redirect to OpenID login.
+`authOpenIDAutoRegister` | Boolean | Whether to automatically register new users from OpenID.
+`authOpenIDMatchExistingBy` | String or null | Field to match existing users by (e.g., "email").
+
+
+## Update Auth Settings
+
+```shell
+curl -X PATCH "https://abs.example.com/api/auth-settings" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY" \
+  -H "Content-Type: application/json" \
+  -d '{"authOpenIDButtonText": "Login with SSO", "authOpenIDAutoLaunch": true}'
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "success": true,
+  "settings": {
+    "authOpenIDButtonText": "Login with SSO",
+    "authOpenIDAutoLaunch": true
+  }
+}
+```
+
+This endpoint updates the server's authentication settings.
+
+### HTTP Request
+
+`PATCH http://abs.example.com/api/auth-settings`
+
+### Parameters
+
+Provide any authentication setting keys to update with their new values.
+
+### Response
+
+Status | Meaning | Description | Schema
+------ | ------- | ----------- | ------
+200 | OK | Success | See below.
+400 | Bad Request | Invalid settings. |
+403 | Forbidden | An admin user is required to update auth settings. |
+
+#### Response Schema
+
+Attribute | Type | Description
+--------- | ---- | -----------
+`success` | Boolean | Whether the settings were updated successfully.
+`settings` | Object | The updated settings.
+
+
+## Update Sorting Prefixes
+
+```shell
+curl -X PATCH "https://abs.example.com/api/sorting-prefixes" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY" \
+  -H "Content-Type: application/json" \
+  -d '{"sortingPrefixes": ["the", "a", "an"]}'
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "success": true,
+  "sortingPrefixes": ["the", "a", "an"]
+}
+```
+
+This endpoint updates the list of prefixes to ignore when sorting titles.
+
+### HTTP Request
+
+`PATCH http://abs.example.com/api/sorting-prefixes`
+
+### Parameters
+
+Parameter | Type | Description
+--------- | ---- | -----------
+`sortingPrefixes` | Array of String | List of prefixes to ignore when sorting (e.g., "the", "a", "an").
+
+### Response
+
+Status | Meaning | Description | Schema
+------ | ------- | ----------- | ------
+200 | OK | Success | See below.
+400 | Bad Request | Invalid prefixes. |
+403 | Forbidden | An admin user is required to update sorting prefixes. |
+
+#### Response Schema
+
+Attribute | Type | Description
+--------- | ---- | -----------
+`success` | Boolean | Whether the prefixes were updated successfully.
+`sortingPrefixes` | Array of String | The updated sorting prefixes.
+
+
+## Update Watched Path
+
+```shell
+curl -X POST "https://abs.example.com/api/watcher/update" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY" \
+  -H "Content-Type: application/json" \
+  -d '{"libraryId": "lib_c1u6t4p45c35rf0nzd"}'
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "success": true,
+  "message": "Watcher updated for library"
+}
+```
+
+This endpoint updates the file watcher for a library's folders.
+
+### HTTP Request
+
+`POST http://abs.example.com/api/watcher/update`
+
+### Parameters
+
+Parameter | Type | Description
+--------- | ---- | -----------
+`libraryId` | String | The ID of the library to update the watcher for.
+
+### Response
+
+Status | Meaning | Description | Schema
+------ | ------- | ----------- | ------
+200 | OK | Success | See below.
+400 | Bad Request | Invalid library ID. |
+403 | Forbidden | An admin user is required to update watchers. |
+404 | Not Found | Library not found. |
+
+#### Response Schema
+
+Attribute | Type | Description
+--------- | ---- | -----------
+`success` | Boolean | Whether the watcher was updated successfully.
+`message` | String | Success message.
+
+
+## Get Logger Data
+
+```shell
+curl "https://abs.example.com/api/logger-data" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "currentDailyLog": {
+    "id": "daily-2024-01-15",
+    "datestamp": "2024-01-15",
+    "logs": [
+      {
+        "timestamp": 1234567890,
+        "level": "info",
+        "message": "Server started",
+        "metadata": {}
+      }
+    ]
+  },
+  "dailyLogFiles": [
+    "daily-2024-01-15.txt",
+    "daily-2024-01-14.txt"
+  ]
+}
+```
+
+This endpoint retrieves current logger data and log file information.
+
+### HTTP Request
+
+`GET http://abs.example.com/api/logger-data`
+
+### Response
+
+Status | Meaning | Description | Schema
+------ | ------- | ----------- | ------
+200 | OK | Success | See below.
+403 | Forbidden | An admin user is required to view logger data. |
+
+#### Response Schema
+
+Attribute | Type | Description
+--------- | ---- | -----------
+`currentDailyLog` | Object | The current day's log entries.
+`dailyLogFiles` | Array of String | List of available daily log files.
+
+
+## Get Tasks
+
+```shell
+curl "https://abs.example.com/api/tasks" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "tasks": [
+    {
+      "id": "task_1234567890",
+      "type": "encode-m4b",
+      "status": "active",
+      "data": {
+        "libraryItemId": "li_8gch9ve09orgn4fdz8",
+        "libraryItemTitle": "Wizards First Rule"
+      },
+      "startedAt": 1234567890,
+      "finishedAt": null
+    }
+  ]
+}
+```
+
+This endpoint retrieves all active and recent background tasks.
+
+### HTTP Request
+
+`GET http://abs.example.com/api/tasks`
+
+### Response
+
+Status | Meaning | Description | Schema
+------ | ------- | ----------- | ------
+200 | OK | Success | See below.
+
+#### Response Schema
+
+Attribute | Type | Description
+--------- | ---- | -----------
+`tasks` | Array of Task Objects | List of background tasks.
+
+#### Task Object
+
+Attribute | Type | Description
+--------- | ---- | -----------
+`id` | String | The task ID.
+`type` | String | The type of task (e.g., "encode-m4b", "embed-metadata").
+`status` | String | The task status ("active", "completed", "failed").
+`data` | Object | Task-specific data.
+`startedAt` | Integer | Timestamp when the task started.
+`finishedAt` | Integer or null | Timestamp when the task finished, or null if still active.

@@ -142,6 +142,101 @@ Status | Meaning | Description
 404 | Not Found | No session with provided ID exists.
 
 
+## Get Open Sessions
+
+```shell
+curl "https://abs.example.com/api/sessions/open" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "sessions": [
+    {
+      "id": "play_c786zm3qtjz6bd5q3n",
+      "userId": "root",
+      "libraryId": "lib_c1u6t4p45c35rf0nzd",
+      "libraryItemId": "li_8gch9ve09orgn4fdz8",
+      "episodeId": null,
+      "mediaType": "book",
+      "displayTitle": "Wizards First Rule",
+      "displayAuthor": "Terry Goodkind",
+      "coverPath": "/audiobooks/Terry Goodkind/Sword of Truth/Wizards First Rule/cover.jpg",
+      "duration": 33854.905,
+      "playMethod": 0,
+      "startedAt": 1668120083771,
+      "updatedAt": 1668330152157,
+      "currentTime": 1234.56
+    }
+  ]
+}
+```
+
+This endpoint retrieves all currently open (active) playback sessions on the server.
+
+### HTTP Request
+
+`GET http://abs.example.com/api/sessions/open`
+
+### Response
+
+Status | Meaning | Description | Schema
+------ | ------- | ----------- | ------
+200 | OK | Success | See below.
+
+#### Response Schema
+
+Attribute | Type | Description
+--------- | ---- | -----------
+`sessions` | Array of [Playback Session](#playback-session) Objects | The active playback sessions.
+
+
+## Batch Delete Sessions
+
+```shell
+curl -X POST "https://abs.example.com/api/sessions/batch/delete" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY" \
+  -H "Content-Type: application/json" \
+  -d '{"sessionIds": ["play_session1", "play_session2", "play_session3"]}'
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "deleted": 3
+}
+```
+
+This endpoint batch deletes multiple listening sessions.
+
+### HTTP Request
+
+`POST http://abs.example.com/api/sessions/batch/delete`
+
+### Parameters
+
+Parameter | Type | Description
+--------- | ---- | -----------
+`sessionIds` | Array of String | List of session IDs to delete.
+
+### Response
+
+Status | Meaning | Description | Schema
+------ | ------- | ----------- | ------
+200 | OK | Success | See below.
+400 | Bad Request | No session IDs provided. |
+403 | Forbidden | A user with delete permissions is required to batch delete sessions. |
+
+#### Response Schema
+
+Attribute | Type | Description
+--------- | ---- | -----------
+`deleted` | Integer | The number of sessions that were deleted.
+
+
 ## Sync a Local Session
 
 ```shell
