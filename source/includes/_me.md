@@ -991,3 +991,208 @@ Status | Meaning | Description | Schema
 ------ | ------- | ----------- | ------
 200 | OK | Success | [User](#user)
 404 | Not Found | No series matching the provided ID was found. |
+
+
+## Readd a Series to Continue Listening
+
+```shell
+curl "https://abs.example.com/api/me/series/ser_cabkj4jeu8be3rap4g/readd-to-continue-listening" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "id": "root",
+  "username": "root",
+  "type": "root",
+  "token": "exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY",
+  "mediaProgress": [
+    {
+      "id": "li_8gch9ve09orgn4fdz8",
+      "libraryItemId": "li_8gch9ve09orgn4fdz8",
+      "episodeId": null,
+      "duration": 33854.905,
+      "progress": 0,
+      "currentTime": 0,
+      "isFinished": false,
+      "hideFromContinueListening": false,
+      "lastUpdate": 1668330152157,
+      "startedAt": 1668120083771,
+      "finishedAt": null
+    }
+  ],
+  "seriesHideFromContinueListening": [],
+  "bookmarks": [],
+  "isActive": true,
+  "isLocked": false,
+  "lastSeen": 1667687240810,
+  "createdAt": 1666569607117,
+  "permissions": {
+    "download": true,
+    "update": true,
+    "delete": true,
+    "upload": true,
+    "accessAllLibraries": true,
+    "accessAllTags": true,
+    "accessExplicitContent": true
+  },
+  "librariesAccessible": [],
+  "itemTagsAccessible": []
+}
+```
+
+This endpoint re-adds a series to your "Continue Series" shelf after it was previously removed. Your user is returned.
+
+### HTTP Request
+
+`GET http://abs.example.com/api/me/series/<ID>/readd-to-continue-listening`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+ID | The ID of the series to readd to continue listening.
+
+### Response
+
+Status | Meaning | Description | Schema
+------ | ------- | ----------- | ------
+200 | OK | Success | [User](#user)
+404 | Not Found | No series matching the provided ID was found. |
+
+
+## Get Your Stats for a Year
+
+```shell
+curl "https://abs.example.com/api/me/stats/year/2024" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "totalItems": 52,
+  "totalAuthors": 15,
+  "totalDuration": 87654.32,
+  "totalListeningTime": 12345.67,
+  "totalSessions": 156,
+  "topGenres": [
+    {
+      "genre": "Science Fiction",
+      "count": 23,
+      "duration": 45678.9
+    }
+  ],
+  "topAuthors": [
+    {
+      "authorId": "aut_z3leimgybl7uf3y4ab",
+      "name": "Brandon Sanderson",
+      "count": 8,
+      "duration": 23456.78
+    }
+  ],
+  "recentlyFinished": [
+    {
+      "id": "li_8gch9ve09orgn4fdz8",
+      "title": "The Way of Kings",
+      "finishedAt": 1234567890
+    }
+  ],
+  "year": 2024
+}
+```
+
+This endpoint retrieves your listening statistics for a specific year.
+
+### HTTP Request
+
+`GET http://abs.example.com/api/me/stats/year/<Year>`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+Year | The year to retrieve statistics for (e.g., 2024).
+
+### Response
+
+Status | Meaning | Description | Schema
+------ | ------- | ----------- | ------
+200 | OK | Success | See below.
+400 | Bad Request | Invalid year format. |
+
+#### Response Schema
+
+Attribute | Type | Description
+--------- | ---- | -----------
+`totalItems` | Integer | Total number of items you've listened to.
+`totalAuthors` | Integer | Total number of unique authors.
+`totalDuration` | Float | Total duration of all media in seconds.
+`totalListeningTime` | Float | Total time you listened in seconds.
+`totalSessions` | Integer | Total number of your playback sessions.
+`topGenres` | Array of Objects | Your most listened to genres.
+`topAuthors` | Array of Objects | Your most listened to authors.
+`recentlyFinished` | Array of Objects | Recently finished items.
+`year` | Integer | The requested year.
+
+
+## Update Your eReader Devices
+
+```shell
+curl -X POST "https://abs.example.com/api/me/ereader-devices" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY" \
+  -H "Content-Type: application/json" \
+  -d '{"ereaderDevices": [{"name": "My Kindle", "email": "mykindle@kindle.com"}]}'
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "ereaderDevices": [
+    {
+      "name": "My Kindle",
+      "email": "mykindle@kindle.com"
+    }
+  ]
+}
+```
+
+This endpoint updates your personal eReader device list for receiving ebooks via email.
+
+### HTTP Request
+
+`POST http://abs.example.com/api/me/ereader-devices`
+
+### Parameters
+
+Parameter | Type | Description
+--------- | ---- | -----------
+`ereaderDevices` | Array of Objects | Your eReader device configurations.
+
+#### eReader Device Object
+
+Attribute | Type | Description
+--------- | ---- | -----------
+`name` | String | Display name for the device.
+`email` | String | Email address of the eReader device (e.g., Kindle email).
+
+### Response
+
+Status | Meaning | Description | Schema
+------ | ------- | ----------- | ------
+200 | OK | Success | See below.
+400 | Bad Request | Invalid eReader device configuration. |
+
+#### Response Schema
+
+Attribute | Type | Description
+--------- | ---- | -----------
+`ereaderDevices` | Array of eReader Device Objects | Your updated eReader devices.
+
+<aside class="notice">
+This is different from the server-wide eReader device configuration in the <a href="#emails">Emails</a> section. This endpoint manages your personal eReader devices.
+</aside>

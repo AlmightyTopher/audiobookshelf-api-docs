@@ -23,10 +23,14 @@ includes:
   - sessions
   - podcasts
   - notifications
+  - emails
   - search
   - cache
   - tools
   - rss_feeds
+  - share
+  - stats
+  - api_keys
   - misc
   - socket
   - metadata_providers

@@ -2433,3 +2433,33 @@ Status | Meaning | Description
 200 | OK | Success
 403 | Forbidden | An admin user is required to quick match library items.
 500 | Internal Server Error | The `libraryItemIds` array must have a non-zero length.
+
+
+## Batch Scan Library Items
+
+```shell
+curl -X POST "https://abs.example.com/api/items/batch/scan" \
+  -H "Authorization: Bearer exJhbGciOiJI6IkpXVCJ9.eyJ1c2Vyi5NDEyODc4fQ.ZraBFohS4Tg39NszY" \
+  -H "Content-Type: application/json" \
+  -d '{"libraryItemIds": ["li_8gch9ve09orgn4fdz8", "li_abc123", "li_def456"]}'
+```
+
+This endpoint triggers a scan for multiple library items to check for changes on the filesystem.
+
+### HTTP Request
+
+`POST http://abs.example.com/api/items/batch/scan`
+
+### Parameters
+
+Parameter | Type | Description
+--------- | ---- | -----------
+`libraryItemIds` | Array of String | The IDs of library items to scan.
+
+### Response
+
+Status | Meaning | Description
+------ | ------- | -----------
+200 | OK | Success - Scan initiated
+400 | Bad Request | No library item IDs provided or invalid IDs.
+403 | Forbidden | An admin user is required to scan library items.
