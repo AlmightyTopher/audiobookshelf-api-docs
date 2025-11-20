@@ -46,12 +46,27 @@ configure :build do
   # rewrite_ignore does not work as it conflicts weirdly with relative_assets. Disabling
   # the .woff2 extension only does not work as .woff will still activate it so have to
   # have both. See https://github.com/slatedocs/slate/issues/1171 for more details.
-  activate :asset_hash, :exts => app.config[:asset_extensions] - %w[.woff .woff2]
+  activate :asset_hash, :exts => app.config[:asset_extensions] - %w[.woff .woff2 .json]
   # If you're having trouble with Middleman hanging, commenting
   # out the following two lines has been known to help
   activate :minify_css
-  activate :minify_javascript
+  # Don't minify service worker or manifest
+  activate :minify_javascript, ignore: ['service-worker.js', 'manifest.json']
   # activate :gzip
+end
+
+# Ignore patterns for build - don't process service worker through asset pipeline
+ignore /service-worker\.js/
+
+# Copy service worker without processing
+after_build do |builder|
+  # Copy service worker from project root
+  src = File.expand_path('../../service-worker.js', __FILE__)
+  dst = File.join(app.config[:build_dir], 'service-worker.js')
+  if File.exist?(src)
+    FileUtils.cp(src, dst)
+    builder.say_status :create, 'service-worker.js', :green
+  end
 end
 
 # Deploy Configuration

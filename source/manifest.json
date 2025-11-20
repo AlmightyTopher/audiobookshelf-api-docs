@@ -1,0 +1,109 @@
+{
+  "name": "Audiobookshelf API Documentation",
+  "short_name": "ABS API Docs",
+  "description": "Complete REST API reference for Audiobookshelf - the self-hosted audiobook and podcast server. Search 135+ endpoints with examples.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#1e2224",
+  "theme_color": "#2e3336",
+  "categories": ["developer", "reference", "documentation"],
+  "lang": "en-US",
+  "dir": "ltr",
+
+  "icons": [
+    {
+      "src": "/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+
+  "screenshots": [
+    {
+      "src": "/images/navbar.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "API Documentation Homepage"
+    }
+  ],
+
+  "shortcuts": [
+    {
+      "name": "Quick Start",
+      "short_name": "Quick Start",
+      "description": "Get started with the API",
+      "url": "/#quick-start",
+      "icons": [
+        {
+          "src": "/images/logo.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Endpoint Matrix",
+      "short_name": "Endpoints",
+      "description": "View all 135 API endpoints",
+      "url": "/#libraries",
+      "icons": [
+        {
+          "src": "/images/logo.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "short_name": "Auth",
+      "description": "Authentication guide",
+      "url": "/#authentication",
+      "icons": [
+        {
+          "src": "/images/logo.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "short_name": "Search",
+      "description": "Search the documentation",
+      "url": "/?search",
+      "icons": [
+        {
+          "src": "/images/logo.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+
+  "related_applications": [],
+  "prefer_related_applications": false,
+
+  "serviceworker": {
+    "src": "/service-worker.js",
+    "scope": "/",
+    "update_via_cache": "none"
+  },
+
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}
