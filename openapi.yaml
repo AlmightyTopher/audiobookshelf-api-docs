@@ -1,0 +1,1006 @@
+openapi: 3.1.0
+
+info:
+  title: Audiobookshelf API
+  version: 2.0.0
+  description: |
+    Complete REST API for the Audiobookshelf audiobook and podcast server.
+
+    ## About
+
+    Audiobookshelf is a self-hosted audiobook and podcast server that allows you to:
+    - Manage your audiobook and podcast libraries
+    - Stream audio to any device
+    - Track your listening progress
+    - Share media with friends
+    - Send ebooks to eReader devices
+    - And much more!
+
+    ## Authentication
+
+    Use Bearer token authentication with your API token or user token.
+
+    You can obtain a token by:
+    1. Using the `/login` endpoint programmatically
+    2. Finding your token in the web app (Config → Users → Your Account)
+    3. Creating an API key via `/api/api-keys` endpoint
+
+    Include the token in the `Authorization` header:
+    ```
+    Authorization: Bearer your_token_here
+    ```
+
+    Alternatively, for GET requests only, you can pass the token as a query parameter:
+    ```
+    ?token=your_token_here
+    ```
+
+    ## Rate Limiting
+
+    Currently, there are no rate limits enforced on the Audiobookshelf API.
+
+    ## Pagination
+
+    List endpoints support pagination with `limit` and `page` query parameters:
+    - `limit`: Number of items per page (default varies by endpoint)
+    - `page`: Page number (0-indexed)
+
+    ## Coverage
+
+    This OpenAPI specification currently covers the most commonly used endpoints.
+    Full coverage of all 135+ endpoints is planned for future releases.
+
+    **Current Coverage:** Core authentication, libraries, items, and user management
+    **See Also:** [Complete Endpoint Matrix](https://github.com/AlmightyTopher/audiobookshelf-api-docs/blob/main/ENDPOINT_MATRIX.md)
+
+  contact:
+    name: Audiobookshelf Community
+    url: https://github.com/advplyr/audiobookshelf
+    email: support@audiobookshelf.org
+
+  license:
+    name: GPL-3.0
+    url: https://github.com/advplyr/audiobookshelf/blob/master/LICENSE
+
+  x-logo:
+    url: https://api.audiobookshelf.org/images/logo.png
+    altText: Audiobookshelf Logo
+
+servers:
+  - url: https://abs.example.com
+    description: Production server (replace with your server URL)
+  - url: http://localhost:13378
+    description: Local development server (default port)
+
+tags:
+  - name: Authentication
+    description: |
+      Login, logout, and authentication management.
+      Obtain API tokens for accessing protected endpoints.
+
+  - name: Libraries
+    description: |
+      Manage libraries that contain your audiobooks and podcasts.
+      Libraries organize content into separate collections.
+
+  - name: Library Items
+    description: |
+      Access and manage individual books and podcast episodes.
+      Includes playback, metadata, covers, and more.
+
+  - name: Users
+    description: |
+      User account management (admin only).
+      Create, update, delete users and manage permissions.
+
+  - name: Me (Current User)
+    description: |
+      Endpoints for the currently authenticated user.
+      Manage your own progress, bookmarks, and preferences.
+
+  - name: API Keys
+    description: |
+      Manage API keys for programmatic access.
+      Create long-lived tokens for integrations and automation.
+
+paths:
+  # ===== AUTHENTICATION =====
+
+  /login:
+    post:
+      summary: Login
+      description: |
+        Authenticate with username and password to receive an API token.
+
+        The token should be used in subsequent requests via the `Authorization` header.
+      tags: [Authentication]
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: User's username
+                  example: admin
+                password:
+                  type: string
+                  format: password
+                  description: User's password
+                  example: password123
+      responses:
+        '200':
+          description: Successfully authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                user:
+                  id: user_123
+                  username: admin
+                  type: admin
+                  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  email: admin@example.com
+                  isActive: true
+                userDefaultLibraryId: lib_abc123
+                serverSettings:
+                  id: server-settings
+                  tokenSecret: random_secret
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /logout:
+    post:
+      summary: Logout
+      description: End the current session and invalidate the token
+      tags: [Authentication]
+      operationId: logout
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logged out
+
+  # ===== LIBRARIES =====
+
+  /api/libraries:
+    get:
+      summary: Get All Libraries
+      description: |
+        Retrieve a list of all libraries accessible to the authenticated user.
+
+        Users will only see libraries they have permission to access.
+      tags: [Libraries]
+      operationId: getLibraries
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of libraries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  libraries:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Library'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      summary: Create a Library
+      description: Create a new library (requires admin permissions)
+      tags: [Libraries]
+      operationId: createLibrary
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLibraryRequest'
+      responses:
+        '200':
+          description: Library created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Library'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/libraries/{id}:
+    parameters:
+      - $ref: '#/components/parameters/LibraryId'
+
+    get:
+      summary: Get a Library
+      description: Get details of a specific library by ID
+      tags: [Libraries]
+      operationId: getLibrary
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Library details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Library'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ===== LIBRARY ITEMS =====
+
+  /api/items/{id}:
+    parameters:
+      - $ref: '#/components/parameters/LibraryItemId'
+
+    get:
+      summary: Get a Library Item
+      description: Get details of a specific library item (book or podcast)
+      tags: [Library Items]
+      operationId: getLibraryItem
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: expanded
+          in: query
+          description: Return expanded item with additional details
+          schema:
+            type: integer
+            enum: [0, 1]
+            default: 0
+        - name: include
+          in: query
+          description: |
+            Comma-separated list of entities to include:
+            - progress: User's progress
+            - rssfeed: RSS feed data
+            - authors: Author details
+          schema:
+            type: string
+            example: progress,authors
+      responses:
+        '200':
+          description: Library item details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibraryItem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ===== USERS =====
+
+  /api/users:
+    get:
+      summary: Get All Users
+      description: Get list of all users (admin only)
+      tags: [Users]
+      operationId: getUsers
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ===== ME (CURRENT USER) =====
+
+  /api/me:
+    get:
+      summary: Get Your User
+      description: Get the currently authenticated user's details
+      tags: [Me (Current User)]
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/me/progress/{id}:
+    parameters:
+      - $ref: '#/components/parameters/LibraryItemId'
+
+    get:
+      summary: Get Your Media Progress
+      description: Get your progress for a specific library item
+      tags: [Me (Current User)]
+      operationId: getProgress
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Progress details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaProgress'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      summary: Update Your Media Progress
+      description: Create or update your progress for a library item
+      tags: [Me (Current User)]
+      operationId: updateProgress
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProgressRequest'
+      responses:
+        '200':
+          description: Progress updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaProgress'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ===== API KEYS =====
+
+  /api/api-keys:
+    get:
+      summary: Get All API Keys
+      description: List all API keys (admin only)
+      tags: [API Keys]
+      operationId: getApiKeys
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of API keys
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  apiKeys:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ApiKey'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      summary: Create an API Key
+      description: Create a new API key for a user (admin only)
+      tags: [API Keys]
+      operationId: createApiKey
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userIdOrUsername
+              properties:
+                userIdOrUsername:
+                  type: string
+                  description: User ID or username to create the key for
+                  example: user_123
+                expiresAt:
+                  type: integer
+                  format: int64
+                  description: Unix timestamp in milliseconds when key expires (null for no expiration)
+                  nullable: true
+                  example: null
+      responses:
+        '200':
+          description: API key created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  apiKey:
+                    allOf:
+                      - $ref: '#/components/schemas/ApiKey'
+                      - type: object
+                        properties:
+                          key:
+                            type: string
+                            description: The API key value (only shown once!)
+                            example: abs_api_1234567890abcdef
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        User token or API key obtained from login or API key creation.
+
+        Include in the Authorization header:
+        ```
+        Authorization: Bearer your_token_here
+        ```
+
+  parameters:
+    LibraryId:
+      name: id
+      in: path
+      required: true
+      description: Library ID
+      schema:
+        type: string
+        example: lib_abc123
+
+    LibraryItemId:
+      name: id
+      in: path
+      required: true
+      description: Library item ID
+      schema:
+        type: string
+        example: li_abc123
+
+    UserId:
+      name: id
+      in: path
+      required: true
+      description: User ID
+      schema:
+        type: string
+        example: user_123
+
+  responses:
+    Unauthorized:
+      description: Authentication required or invalid token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: Unauthorized
+
+    Forbidden:
+      description: Insufficient permissions (e.g., admin access required)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: Forbidden - Admin access required
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: Not found
+
+    BadRequest:
+      description: Invalid request parameters or body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: Validation failed
+            errors:
+              - Name is required
+              - Folders must not be empty
+
+  schemas:
+    # ===== AUTHENTICATION =====
+
+    LoginResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        userDefaultLibraryId:
+          type: string
+          nullable: true
+          description: Default library ID for the user
+        serverSettings:
+          type: object
+          description: Server settings
+        ereaderDevices:
+          type: array
+          items:
+            $ref: '#/components/schemas/EReaderDevice'
+
+    # ===== USER =====
+
+    User:
+      type: object
+      required:
+        - id
+        - username
+        - type
+        - token
+        - isActive
+      properties:
+        id:
+          type: string
+          description: User ID
+          example: user_123
+        username:
+          type: string
+          description: Username
+          example: admin
+        type:
+          type: string
+          enum: [root, admin, user, guest]
+          description: User role/type
+          example: admin
+        token:
+          type: string
+          description: API authentication token
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        email:
+          type: string
+          format: email
+          nullable: true
+          description: User email address
+          example: admin@example.com
+        isActive:
+          type: boolean
+          description: Whether the user account is active
+          default: true
+        isLocked:
+          type: boolean
+          description: Whether the user account is locked
+          default: false
+        librariesAccessible:
+          type: array
+          items:
+            type: string
+          description: List of library IDs the user can access
+        itemTagsAccessible:
+          type: array
+          items:
+            type: string
+          description: List of item tags the user can access
+        permissions:
+          $ref: '#/components/schemas/Permissions'
+        createdAt:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds
+        lastSeen:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix timestamp in milliseconds
+
+    Permissions:
+      type: object
+      properties:
+        download:
+          type: boolean
+          description: Can download media files
+        update:
+          type: boolean
+          description: Can update library items
+        delete:
+          type: boolean
+          description: Can delete library items
+        upload:
+          type: boolean
+          description: Can upload files
+        accessAllLibraries:
+          type: boolean
+          description: Has access to all libraries
+        accessAllTags:
+          type: boolean
+          description: Has access to all tags
+        accessExplicitContent:
+          type: boolean
+          description: Can access explicit content
+
+    # ===== LIBRARY =====
+
+    Library:
+      type: object
+      required:
+        - id
+        - name
+        - folders
+        - displayOrder
+        - icon
+        - mediaType
+      properties:
+        id:
+          type: string
+          description: Library ID
+          example: lib_abc123
+        name:
+          type: string
+          description: Library name
+          example: Audiobooks
+        folders:
+          type: array
+          items:
+            $ref: '#/components/schemas/Folder'
+          description: Folders in this library
+        displayOrder:
+          type: integer
+          description: Display order for sorting
+          minimum: 1
+          example: 1
+        icon:
+          type: string
+          description: Icon name
+          example: database
+        mediaType:
+          type: string
+          enum: [book, podcast]
+          description: Type of media in this library
+        provider:
+          type: string
+          description: Metadata provider
+          example: google
+        settings:
+          $ref: '#/components/schemas/LibrarySettings'
+        createdAt:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds
+        lastUpdate:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds
+
+    Folder:
+      type: object
+      required:
+        - id
+        - fullPath
+        - libraryId
+      properties:
+        id:
+          type: string
+          example: fol_abc123
+        fullPath:
+          type: string
+          description: Full filesystem path
+          example: /audiobooks
+        libraryId:
+          type: string
+          description: Parent library ID
+          example: lib_abc123
+
+    LibrarySettings:
+      type: object
+      properties:
+        coverAspectRatio:
+          type: integer
+          enum: [0, 1, 2]
+          description: Cover aspect ratio (0=square, 1=standard, 2=wide)
+        disableWatcher:
+          type: boolean
+          description: Disable filesystem watcher
+        skipMatchingMediaWithAsin:
+          type: boolean
+          description: Skip matching items that already have an ASIN
+        skipMatchingMediaWithIsbn:
+          type: boolean
+          description: Skip matching items that already have an ISBN
+        audiobooksOnly:
+          type: boolean
+          description: Only show audiobooks (exclude ebooks)
+        autoScanCronExpression:
+          type: string
+          nullable: true
+          description: Cron expression for automatic scanning
+          example: "0 2 * * *"
+
+    CreateLibraryRequest:
+      type: object
+      required:
+        - name
+        - folders
+        - mediaType
+      properties:
+        name:
+          type: string
+          description: Library name
+          example: My Audiobooks
+        folders:
+          type: array
+          items:
+            type: string
+          description: Filesystem paths
+          example: ["/audiobooks", "/more-audiobooks"]
+        mediaType:
+          type: string
+          enum: [book, podcast]
+          description: Type of media
+        icon:
+          type: string
+          description: Icon name
+          default: database
+        provider:
+          type: string
+          description: Metadata provider
+          default: google
+
+    # ===== LIBRARY ITEM =====
+
+    LibraryItem:
+      type: object
+      properties:
+        id:
+          type: string
+          example: li_abc123
+        ino:
+          type: string
+          description: Inode
+        libraryId:
+          type: string
+          example: lib_abc123
+        folderId:
+          type: string
+          example: fol_abc123
+        path:
+          type: string
+          description: Filesystem path
+        relPath:
+          type: string
+          description: Relative path
+        isFile:
+          type: boolean
+        mtimeMs:
+          type: integer
+          format: int64
+        ctimeMs:
+          type: integer
+          format: int64
+        birthtimeMs:
+          type: integer
+          format: int64
+        addedAt:
+          type: integer
+          format: int64
+        updatedAt:
+          type: integer
+          format: int64
+        isMissing:
+          type: boolean
+        isInvalid:
+          type: boolean
+        mediaType:
+          type: string
+          enum: [book, podcast]
+        media:
+          oneOf:
+            - $ref: '#/components/schemas/Book'
+            - $ref: '#/components/schemas/Podcast'
+
+    Book:
+      type: object
+      description: Book media details (simplified schema)
+      properties:
+        metadata:
+          type: object
+          properties:
+            title:
+              type: string
+            author:
+              type: string
+            description:
+              type: string
+            genres:
+              type: array
+              items:
+                type: string
+
+    Podcast:
+      type: object
+      description: Podcast media details (simplified schema)
+      properties:
+        metadata:
+          type: object
+          properties:
+            title:
+              type: string
+            author:
+              type: string
+            description:
+              type: string
+
+    # ===== PROGRESS =====
+
+    MediaProgress:
+      type: object
+      properties:
+        id:
+          type: string
+        libraryItemId:
+          type: string
+        episodeId:
+          type: string
+          nullable: true
+        duration:
+          type: number
+          format: float
+          description: Total duration in seconds
+        progress:
+          type: number
+          format: float
+          description: Progress percentage (0-1)
+        currentTime:
+          type: number
+          format: float
+          description: Current playback position in seconds
+        isFinished:
+          type: boolean
+        hideFromContinueListening:
+          type: boolean
+        ebookProgress:
+          type: number
+          format: float
+          nullable: true
+        lastUpdate:
+          type: integer
+          format: int64
+        startedAt:
+          type: integer
+          format: int64
+        finishedAt:
+          type: integer
+          format: int64
+          nullable: true
+
+    UpdateProgressRequest:
+      type: object
+      required:
+        - currentTime
+      properties:
+        currentTime:
+          type: number
+          format: float
+          description: Current playback position in seconds
+          example: 1234.5
+        isFinished:
+          type: boolean
+          description: Mark as finished
+          default: false
+        ebookProgress:
+          type: number
+          format: float
+          description: Progress through ebook (0-1)
+          nullable: true
+
+    # ===== API KEYS =====
+
+    ApiKey:
+      type: object
+      properties:
+        id:
+          type: string
+          example: apk_abc123
+        userId:
+          type: string
+          example: user_123
+        createdAt:
+          type: integer
+          format: int64
+        expiresAt:
+          type: integer
+          format: int64
+          nullable: true
+          description: Expiration timestamp (null for no expiration)
+
+    EReaderDevice:
+      type: object
+      properties:
+        name:
+          type: string
+          example: My Kindle
+        email:
+          type: string
+          format: email
+          example: username@kindle.com
+
+    # ===== ERROR =====
+
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Error message
+          example: An error occurred
+        error:
+          type: string
+          description: Error type
+        errors:
+          type: array
+          items:
+            type: string
+          description: List of validation errors
+
+# ===== WEBHOOKS (Future) =====
+
+webhooks: {}
+
+# ===== EXTENSIONS =====
+
+x-tagGroups:
+  - name: Core
+    tags:
+      - Authentication
+      - Libraries
+      - Library Items
+  - name: User Management
+    tags:
+      - Users
+      - Me (Current User)
+  - name: Automation
+    tags:
+      - API Keys

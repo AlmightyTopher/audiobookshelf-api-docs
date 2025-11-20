@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline - Audiobookshelf API Documentation</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #1e2224 0%, #2e3336 100%);
+      color: #f3f6f8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      text-align: center;
+    }
+
+    .icon {
+      font-size: 80px;
+      margin-bottom: 30px;
+      opacity: 0.8;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+
+    p {
+      font-size: 1.2em;
+      line-height: 1.6;
+      margin-bottom: 15px;
+      opacity: 0.9;
+    }
+
+    .info-box {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 30px;
+      margin: 30px 0;
+      backdrop-filter: blur(10px);
+    }
+
+    .button {
+      display: inline-block;
+      background: #4CAF50;
+      color: white;
+      padding: 15px 30px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: bold;
+      margin: 10px;
+      transition: background 0.3s;
+    }
+
+    .button:hover {
+      background: #45a049;
+    }
+
+    .button.secondary {
+      background: #2196F3;
+    }
+
+    .button.secondary:hover {
+      background: #0b7dda;
+    }
+
+    .tips {
+      text-align: left;
+      margin: 30px auto;
+      max-width: 500px;
+    }
+
+    .tips h2 {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      color: #fff;
+    }
+
+    .tips ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .tips li {
+      padding: 10px 0;
+      padding-left: 30px;
+      position: relative;
+    }
+
+    .tips li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #4CAF50;
+      font-weight: bold;
+    }
+
+    .status {
+      font-size: 0.9em;
+      opacity: 0.7;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2em;
+      }
+
+      .icon {
+        font-size: 60px;
+      }
+
+      p {
+        font-size: 1em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">📡</div>
+
+    <h1>You're Offline</h1>
+
+    <div class="info-box">
+      <p>
+        It looks like you're not connected to the internet. The Audiobookshelf API documentation requires an internet connection for the initial load.
+      </p>
+      <p>
+        Once you've loaded the documentation while online, it will be available offline for future visits.
+      </p>
+    </div>
+
+    <a href="/" class="button" onclick="window.location.reload(); return false;">
+      Try Again
+    </a>
+
+    <a href="javascript:history.back()" class="button secondary">
+      Go Back
+    </a>
+
+    <div class="tips">
+      <h2>Offline Features</h2>
+      <ul>
+        <li>Documentation is cached after first visit</li>
+        <li>Search works offline once cached</li>
+        <li>All code examples are available</li>
+        <li>Progressive Web App (PWA) support</li>
+      </ul>
+    </div>
+
+    <div class="tips">
+      <h2>Troubleshooting</h2>
+      <ul>
+        <li>Check your internet connection</li>
+        <li>Try refreshing the page</li>
+        <li>Clear your browser cache and try again</li>
+        <li>Disable VPN if you're using one</li>
+      </ul>
+    </div>
+
+    <div class="status">
+      <p>
+        <strong>Audiobookshelf API Documentation</strong><br>
+        Version 2.0 | Coverage: 97.8% (135/138 endpoints)
+      </p>
+      <p style="margin-top: 10px;">
+        <a href="https://github.com/advplyr/audiobookshelf" style="color: #4CAF50; text-decoration: none;">
+          View on GitHub →
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Auto-retry connection every 5 seconds
+    let retryCount = 0;
+    const maxRetries = 3;
+
+    function checkConnection() {
+      if (navigator.onLine && retryCount < maxRetries) {
+        retryCount++;
+        console.log(`Retrying connection... (${retryCount}/${maxRetries})`);
+
+        // Try to reload after a short delay
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
+    }
+
+    // Listen for online event
+    window.addEventListener('online', checkConnection);
+
+    // Check connection status
+    window.addEventListener('load', () => {
+      if (navigator.onLine) {
+        // We're online but the page still failed to load
+        // Try to reload
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      }
+    });
+
+    // Prevent multiple rapid reloads
+    if (sessionStorage.getItem('offline-reload-count')) {
+      let count = parseInt(sessionStorage.getItem('offline-reload-count'));
+      if (count > 3) {
+        console.log('Too many reload attempts, stopping auto-retry');
+        window.removeEventListener('online', checkConnection);
+      }
+      sessionStorage.setItem('offline-reload-count', count + 1);
+    } else {
+      sessionStorage.setItem('offline-reload-count', '1');
+    }
+  </script>
+</body>
+</html>
