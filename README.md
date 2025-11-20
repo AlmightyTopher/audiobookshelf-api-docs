@@ -11,6 +11,16 @@
 
 ## 🚀 Quick Start
 
+### 🎓 New to APIs or Programming?
+
+**Start here!**
+- **[README for Dummies](README_FOR_DUMMIES.md)** - Explains everything in plain English
+- **[Installation Guide for Dummies](INSTALLATION_GUIDE_FOR_DUMMIES.md)** - Step-by-step setup (Windows/Mac/Linux)
+
+No technical knowledge assumed. Perfect for beginners! 👶
+
+---
+
 ### For API Users
 
 **Get started in 5 minutes:**
@@ -419,6 +429,8 @@ This documentation repository follows the same license as the main Audiobookshel
 
 | Resource | Link |
 |----------|------|
+| **🎓 For Beginners** | [README for Dummies](README_FOR_DUMMIES.md) |
+| **🛠️ Installation Help** | [Installation Guide for Dummies](INSTALLATION_GUIDE_FOR_DUMMIES.md) |
 | **📖 Live Docs** | [api.audiobookshelf.org](https://api.audiobookshelf.org) |
 | **🚀 Quick Start** | [Getting Started Guide](https://api.audiobookshelf.org/#quick-start) |
 | **📋 Endpoint Matrix** | [All 135 Endpoints](ENDPOINT_MATRIX.md) |
