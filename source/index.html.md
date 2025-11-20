@@ -9,6 +9,7 @@ toc_footers:
   - <a href='https://github.com/slatedocs/slate'>Documentation Powered by Slate</a>
 
 includes:
+  - quick_start
   - server
   - libraries
   - items
@@ -48,7 +49,18 @@ meta:
 
 # Introduction
 
-<aside class="warning">These API docs are out-of-date and are no longer maintained. We hope to implement automated OpenAPI docs in the future.</aside>
+Welcome to the Audiobookshelf API documentation! This comprehensive guide covers all 135+ endpoints for managing your audiobook and podcast server.
+
+**Coverage:** 97.8% of all API endpoints (135/138 documented)
+**Last Updated:** 2025-11-20
+
+<aside class="success">
+These docs have been recently updated with 29 new endpoints including API Keys, Media Sharing, Email Integration, and Server Statistics!
+</aside>
+
+<aside class="notice">
+We plan to implement automated OpenAPI docs in the future for even better API documentation.
+</aside>
 
 # Authentication
 
